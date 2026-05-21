@@ -1,0 +1,197 @@
+---
+title: "TypeScript Generics Explained: Write Once, Use Everywhere"
+date: "2024-01-22"
+tags: ["typescript", "javascript", "types"]
+description: "TypeScript generics let you write reusable, type-safe code without sacrificing flexibility. Learn how to use generic functions, interfaces, constraints, and utility types effectively."
+excerpt: "Generics are TypeScript's most powerful feature for code reuse. Once you understand them, you'll stop writing duplicate typed functions and start building APIs that are both flexible and fully type-safe."
+ogImage: "/og/typescript-generics-explained.png"
+---
+
+## The Problem Generics Solve
+
+Imagine you need a function that wraps any value in an array. Without generics, you'd either lose type safety or write separate functions for every type:
+
+```typescript
+// ❌ Loses type information — returns any[]
+function wrap(value: any): any[] {
+  return [value]
+}
+
+// ❌ Verbose — duplicate code for each type
+function wrapString(value: string): string[] { return [value] }
+function wrapNumber(value: number): number[] { return [value] }
+```
+
+Generics let you write this once and let TypeScript infer the type at the call site:
+
+```typescript
+// ✅ Generic — flexible and fully typed
+function wrap<T>(value: T): T[] {
+  return [value]
+}
+
+const strings = wrap("hello")  // inferred as string[]
+const numbers = wrap(42)       // inferred as number[]
+const users   = wrap(user)     // inferred as User[]
+```
+
+The `T` is a **type parameter** — a placeholder that gets filled in when you call the function. TypeScript infers it from the argument, so you rarely need to specify it explicitly.
+
+## Generic Functions
+
+Type parameters can appear anywhere in a function signature — parameters, return type, or both:
+
+```typescript
+function first<T>(arr: T[]): T | undefined {
+  return arr[0]
+}
+
+function zip<A, B>(a: A[], b: B[]): Array<[A, B]> {
+  return a.map((item, i) => [item, b[i]])
+}
+
+const pairs = zip([1, 2, 3], ["a", "b", "c"])
+// pairs: Array<[number, string]>
+```
+
+Multiple type parameters are perfectly valid. Name them descriptively when they represent domain concepts: `TKey`, `TValue`, `TInput`, `TOutput`.
+
+## Generic Interfaces and Types
+
+Generics work equally well on interfaces and type aliases:
+
+```typescript
+interface ApiResponse<T> {
+  data: T
+  status: number
+  message: string
+  timestamp: string
+}
+
+interface PaginatedResult<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+  hasMore: boolean
+}
+
+async function fetchUsers(): Promise<ApiResponse<User[]>> {
+  const res = await fetch('/api/users')
+  return res.json()
+}
+```
+
+This pattern is ubiquitous in API clients. Instead of defining `UserApiResponse`, `PostApiResponse`, and so on for every entity, you define `ApiResponse<T>` once and use it everywhere.
+
+## Constraints: Limiting What T Can Be
+
+Sometimes a generic function needs to access specific properties of `T`. You express this with the `extends` keyword:
+
+```typescript
+// T must have an id property
+function findById<T extends { id: string | number }>(
+  items: T[],
+  id: string | number
+): T | undefined {
+  return items.find(item => item.id === id)
+}
+
+// T must be an object — prevents primitive types
+function keys<T extends object>(obj: T): Array<keyof T> {
+  return Object.keys(obj) as Array<keyof T>
+}
+```
+
+Constraints let you be flexible about the type while still accessing the properties you need. The function signature documents exactly what it requires.
+
+## The `keyof` and `typeof` Operators
+
+These two operators unlock powerful type-level computations:
+
+```typescript
+// keyof creates a union of all property names
+type UserKeys = keyof User // "id" | "name" | "email" | "role"
+
+// Access a property safely with a generic key
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key]
+}
+
+const name = getProperty(user, "name")  // typed as string
+const role = getProperty(user, "role")  // typed as string | "admin"
+// getProperty(user, "invalid") → compile error ✓
+```
+
+`getProperty` is type-safe at three levels: the object must exist, the key must be a valid property name, and the return type matches the property type. All verified at compile time.
+
+## Built-in Utility Types
+
+TypeScript ships with a library of generic utility types that transform existing types:
+
+```typescript
+interface User {
+  id: string
+  name: string
+  email: string
+  password: string
+  role: "admin" | "member"
+}
+
+// Make all properties optional
+type PartialUser = Partial<User>
+
+// Make all properties required
+type RequiredUser = Required<User>
+
+// Pick specific properties
+type UserProfile = Pick<User, "id" | "name" | "email">
+
+// Exclude specific properties
+type SafeUser = Omit<User, "password">
+
+// Make all properties read-only
+type FrozenUser = Readonly<User>
+
+// Record: map type keys to a value type
+type PermissionMap = Record<User["role"], string[]>
+```
+
+These types compose. `Partial<Pick<User, "name" | "email">>` creates a type where only name and email exist and both are optional — perfect for update payload types.
+
+## A Real-World Example
+
+Here's how generics come together in a `useQuery` hook pattern:
+
+```typescript
+interface QueryState<T> {
+  data: T | null
+  loading: boolean
+  error: string | null
+}
+
+function useQuery<T>(url: string): QueryState<T> {
+  const [state, setState] = useState<QueryState<T>>({
+    data: null,
+    loading: true,
+    error: null,
+  })
+
+  useEffect(() => {
+    fetch(url)
+      .then(r => r.json() as Promise<T>)
+      .then(data => setState({ data, loading: false, error: null }))
+      .catch(err => setState({ data: null, loading: false, error: err.message }))
+  }, [url])
+
+  return state
+}
+
+// Usage — fully typed without any explicit annotations
+const { data, loading } = useQuery<User[]>('/api/users')
+// data is User[] | null, loading is boolean
+```
+
+## Conclusion
+
+Generics transform TypeScript from "JavaScript with type annotations" into a genuine type-level programming language. They let you express relationships between types, build reusable APIs that preserve type information, and catch entire classes of bugs at compile time. The investment in learning them pays compound interest as your codebase grows.

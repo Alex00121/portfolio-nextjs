@@ -1,0 +1,131 @@
+---
+title: "CSS Grid Deep Dive: Mastering Two-Dimensional Layouts"
+date: "2024-02-08"
+tags: ["css", "layout", "frontend"]
+description: "CSS Grid gives you a two-dimensional layout system directly in the browser. Learn the essential properties, common patterns, and when to choose Grid over Flexbox."
+excerpt: "CSS Grid is the most powerful layout tool available in browsers today. This guide covers everything from basic tracks to named areas, auto-placement algorithms, and responsive patterns without media queries."
+ogImage: "/og/css-grid-deep-dive.png"
+---
+
+## What Makes Grid Different
+
+Flexbox is one-dimensional. You arrange items along a single axis — either a row or a column. It's perfect for navigation bars, button groups, and small UI components. But when you need to control both rows and columns simultaneously, Flexbox requires nesting, and the layout logic gets scattered across multiple elements.
+
+CSS Grid is two-dimensional from the ground up. You define tracks (rows and columns), place items anywhere in the resulting grid, and let the browser handle gaps, alignment, and overflow. The layout contract lives entirely on the container.
+
+## Defining Your Grid
+
+Start by declaring `display: grid` on a container and specifying your columns:
+
+```css
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 24px;
+  min-height: 100vh;
+}
+```
+
+The `fr` unit represents a fraction of the available space after fixed-size and `minmax()` tracks are resolved. `1fr` means "take whatever space remains."
+
+The `repeat()` function avoids repetition for uniform grids:
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+```
+
+## `minmax()` and Responsive Grids
+
+The real power of Grid for responsive design lies in `minmax()` combined with `auto-fill` or `auto-fit`:
+
+```css
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+```
+
+This single rule creates a responsive grid that automatically adjusts the number of columns based on available space — no media queries required. Each column is at least 280px wide but expands to fill space equally. Add more cards, and the grid reflows naturally.
+
+The difference between `auto-fill` and `auto-fit` is subtle: `auto-fill` creates empty track slots if there aren't enough items; `auto-fit` collapses empty tracks so items stretch to fill the space.
+
+## Placing Items Explicitly
+
+Auto-placement handles most cases, but Grid lets you position items with surgical precision using line numbers:
+
+```css
+.hero {
+  grid-column: 1 / -1; /* span full width, -1 = last line */
+}
+
+.featured {
+  grid-column: 1 / 3;
+  grid-row: 2 / 4;
+}
+```
+
+Negative line numbers count from the end. `1 / -1` always means "full width regardless of column count" — a useful pattern for hero sections.
+
+The `span` keyword is more readable when you know the size but not the exact position:
+
+```css
+.wide-card {
+  grid-column: span 2; /* occupy 2 columns wherever placed */
+}
+```
+
+## Named Areas
+
+For complex layouts, named areas make the grid self-documenting:
+
+```css
+.page {
+  display: grid;
+  grid-template-areas:
+    "header  header"
+    "sidebar main"
+    "footer  footer";
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 64px 1fr 48px;
+}
+
+.page-header  { grid-area: header; }
+.page-sidebar { grid-area: sidebar; }
+.page-main    { grid-area: main; }
+.page-footer  { grid-area: footer; }
+```
+
+Reading the template string, you can immediately visualize the layout. Rearranging the layout becomes a matter of editing the ASCII art.
+
+## Alignment and Justification
+
+Grid supports the full alignment spec along both axes:
+
+| Property | Aligns | Direction |
+|---|---|---|
+| `justify-items` | All items | Inline (row) |
+| `align-items` | All items | Block (column) |
+| `justify-content` | The grid itself | Inline |
+| `align-content` | The grid itself | Block |
+| `justify-self` | Single item | Inline |
+| `align-self` | Single item | Block |
+
+`place-items: center` is a shorthand that centers all items in both directions — handy for centering the content of a cell.
+
+## Grid vs Flexbox: The Practical Rule
+
+Use **Grid** when the layout is driven by the container — when you know the structure in advance and want items to conform to it. Dashboards, page skeletons, card galleries, and magazine-style layouts are Grid territory.
+
+Use **Flexbox** when the layout is driven by the content — when you want items to grow and shrink naturally based on what they contain. Navigation bars, tag lists, button rows, and any linear arrangement belong to Flexbox.
+
+In practice, they complement each other. A Grid page layout can contain Flexbox navigation. A Flexbox card can contain a Grid for its internal structure.
+
+## Conclusion
+
+CSS Grid eliminates most of the hacks that used to be necessary for two-dimensional layouts — no more negative margins, clearfix, or table-based structures. Invest an hour learning `repeat()`, `minmax()`, named areas, and the alignment properties. The return on that investment is layouts that are declarative, readable, and maintainable for years.

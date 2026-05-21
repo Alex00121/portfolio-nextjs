@@ -1,0 +1,123 @@
+---
+title: "Understanding React Hooks: A Complete Guide"
+date: "2024-03-15"
+tags: ["react", "javascript", "hooks"]
+description: "A deep dive into React Hooks — how they work under the hood, when to use each one, and patterns for building custom hooks that keep your code clean."
+excerpt: "React Hooks revolutionized how we write functional components. This guide explores useState, useEffect, useCallback, and how to build your own custom hooks for real-world scenarios."
+ogImage: "/og/understanding-react-hooks.png"
+---
+
+## Why Hooks Changed Everything
+
+Before React 16.8, stateful logic in React lived inside class components. If you needed local state or lifecycle methods, you had to use `class MyComponent extends React.Component`. Functional components were "dumb" — pure rendering functions with no memory.
+
+Hooks changed that entirely. They let you "hook into" React's features from a function. No classes, no `this`, no constructor. The result is code that is shorter, easier to understand, and far easier to test.
+
+Hooks also solve a long-standing problem with **reusing stateful logic** between components. Before hooks, the patterns for this were render props and higher-order components — both of which produced deeply nested component trees that were hard to trace. A custom hook is just a function, and composing functions is the most natural thing in JavaScript.
+
+## useState: State That Remembers
+
+`useState` is the most fundamental hook. You call it with an initial value and get back a pair: the current state, and a setter function.
+
+```tsx
+const [count, setCount] = useState(0)
+const [user, setUser] = useState<User | null>(null)
+```
+
+One key thing to understand: **React state updates are asynchronous**. When you call `setCount(count + 1)`, React doesn't immediately update `count`. It schedules a re-render. This is why the following has a subtle bug:
+
+```tsx
+// ❌ Stale closure — reads outdated value
+function increment() {
+  setCount(count + 1)
+  setCount(count + 1) // still uses the old count
+}
+
+// ✅ Functional update — always uses the latest value
+function increment() {
+  setCount(prev => prev + 1)
+  setCount(prev => prev + 1) // correctly increments twice
+}
+```
+
+Use the functional form whenever the new state depends on the old one.
+
+## useEffect: Synchronizing with the Outside World
+
+`useEffect` lets your component stay in sync with external systems — APIs, subscriptions, timers, browser APIs, and more. Think of it as "after render, do this side effect."
+
+```tsx
+useEffect(() => {
+  const controller = new AbortController()
+
+  fetch(`/api/users/${userId}`, { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(err => {
+      if (err.name !== 'AbortError') setError(err.message)
+    })
+
+  return () => controller.abort()
+}, [userId]) // re-run when userId changes
+```
+
+The dependency array is critical. An empty array `[]` means "run once on mount." No array means "run after every render" — almost always wrong. Provide the exact set of values the effect depends on.
+
+The **cleanup function** (the return value) is equally important. It runs before the next effect fires and on unmount. Without cleanup, you get memory leaks from lingering subscriptions and race conditions from stale fetch responses.
+
+## useCallback and useMemo: Optimizing Renders
+
+`useCallback` memoizes a function reference; `useMemo` memoizes a computed value. Both accept a dependency array like `useEffect`.
+
+```tsx
+const handleSearch = useCallback((query: string) => {
+  setSearchTerm(query)
+  fetchResults(query)
+}, [fetchResults]) // stable reference unless fetchResults changes
+
+const sortedItems = useMemo(
+  () => items.slice().sort((a, b) => a.price - b.price),
+  [items]
+)
+```
+
+These are optimization tools, not correctness tools. Only reach for them when profiling shows a real performance issue. Premature memoization adds cognitive overhead without benefit when the computation is cheap.
+
+## Building Custom Hooks
+
+Custom hooks are where the real power lives. A custom hook is simply a function whose name starts with `use` and that calls other hooks internally.
+
+```tsx
+function useLocalStorage<T>(key: string, initialValue: T) {
+  const [stored, setStored] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch {
+      return initialValue
+    }
+  })
+
+  const setValue = useCallback((value: T) => {
+    setStored(value)
+    window.localStorage.setItem(key, JSON.stringify(value))
+  }, [key])
+
+  return [stored, setValue] as const
+}
+```
+
+Now any component can persist state to `localStorage` with `const [theme, setTheme] = useLocalStorage('theme', 'light')`. The implementation details are completely encapsulated.
+
+## The Rules of Hooks
+
+React enforces two rules:
+
+1. **Only call hooks at the top level.** Never inside loops, conditionals, or nested functions. React identifies hooks by their call order — breaking order between renders causes chaos.
+2. **Only call hooks from React functions.** Either React function components or custom hooks.
+
+The `eslint-plugin-react-hooks` package enforces both rules automatically. Install it and never think about it again.
+
+## Conclusion
+
+Hooks represent a fundamentally better model for stateful UI logic. They align with how JavaScript developers already think — functions composing other functions. Master `useState`, `useEffect`, `useCallback`, and `useMemo`, then invest time in building a library of custom hooks for your domain. The payoff in code reuse and testability is enormous.
