@@ -84,6 +84,8 @@ export default function FAQ() {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                aria-expanded={openIndex === i}
+                aria-controls={`faq-panel-${i}`}
                 className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-gray-50 transition-colors duration-150"
               >
                 <span className="font-semibold text-gray-900 pr-4">
@@ -99,6 +101,8 @@ export default function FAQ() {
               <AnimatePresence>
                 {openIndex === i && (
                   <motion.div
+                    key={`faq-panel-${i}`}
+                    id={`faq-panel-${i}`}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
