@@ -73,7 +73,10 @@ export default function FilterSidebar({ filters, onChange }: Props) {
               min={0}
               max={500}
               value={filters.maxPrice}
-              onChange={(e) => onChange({ ...filters, maxPrice: Number(e.target.value) })}
+              onChange={(e) => {
+                const val = Number(e.target.value)
+                onChange({ ...filters, maxPrice: val, minPrice: Math.min(filters.minPrice, val) })
+              }}
               className="w-full accent-indigo-600"
             />
             <input
@@ -81,7 +84,10 @@ export default function FilterSidebar({ filters, onChange }: Props) {
               min={0}
               max={500}
               value={filters.minPrice}
-              onChange={(e) => onChange({ ...filters, minPrice: Number(e.target.value) })}
+              onChange={(e) => {
+                const val = Number(e.target.value)
+                onChange({ ...filters, minPrice: val, maxPrice: Math.max(filters.maxPrice, val) })
+              }}
               className="w-full accent-indigo-600"
             />
           </div>

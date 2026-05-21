@@ -16,9 +16,7 @@ export default function ProductDetail({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem)
 
   function handleAddToCart() {
-    for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedColor, selectedSize)
-    }
+    addItem(product, selectedColor, selectedSize, quantity)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, CreditCard, MapPin, User } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
@@ -36,10 +36,13 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<FormData>(INITIAL)
   const [errors, setErrors] = useState<Partial<FormData>>({})
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { subtotal, items } = useCartStore()
   const sub = subtotal()
   const total = sub + (sub >= 50 ? 0 : 5.99) + sub * 0.2
+
+  useEffect(() => setMounted(true), [])
 
   function update(field: keyof FormData, value: string) {
     setForm((f) => ({ ...f, [field]: value }))
@@ -83,9 +86,13 @@ export default function CheckoutPage() {
   async function handleSubmit() {
     if (!validateStep3()) return
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1800))
-    useCartStore.getState().clearCart()
-    router.push('/order-confirmation')
+    try {
+      await new Promise((r) => setTimeout(r, 1800))
+      useCartStore.getState().clearCart()
+      router.push('/order-confirmation')
+    } catch {
+      setLoading(false)
+    }
   }
 
   function formatCard(v: string) {
@@ -96,7 +103,16 @@ export default function CheckoutPage() {
     return v.replace(/\D/g, '').slice(0, 4).replace(/^(\d{2})(\d)/, '$1/$2')
   }
 
-  if (items.length === 0 && step === 1) {
+  if (!mounted) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="h-8 w-48 bg-gray-100 rounded animate-pulse mb-8" />
+        <div className="bg-white rounded-2xl border border-gray-100 h-64 animate-pulse" />
+      </div>
+    )
+  }
+
+  if (items.length === 0 && step !== 3) {
     return (
       <div className="max-w-lg mx-auto px-4 py-24 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Panier vide</h1>

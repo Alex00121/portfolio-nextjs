@@ -4,10 +4,27 @@ import Image from 'next/image'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { getProductImageUrl } from '@/lib/products'
+import { useEffect, useState } from 'react'
 
 export default function CartPage() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const { items, removeItem, updateQuantity, subtotal } = useCartStore()
   const sub = subtotal()
+
+  if (!mounted) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="h-8 w-48 bg-gray-100 rounded animate-pulse mb-8" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 h-28 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
   const shipping = sub >= 50 ? 0 : 5.99
   const tax = sub * 0.2
   const total = sub + shipping + tax
