@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
+import { cache } from 'react'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 
@@ -34,7 +35,7 @@ export function getPostSlugs(): string[] {
     .map((f) => f.replace('.mdx', ''))
 }
 
-export function getPostBySlug(slug: string): Post | null {
+export const getPostBySlug = cache(function getPostBySlug(slug: string): Post | null {
   const filePath = path.join(CONTENT_DIR, `${slug}.mdx`)
   if (!fs.existsSync(filePath)) return null
 
@@ -49,7 +50,7 @@ export function getPostBySlug(slug: string): Post | null {
     content,
     readingTime,
   }
-}
+})
 
 export function getAllPosts(): Post[] {
   return getPostSlugs()
@@ -69,7 +70,7 @@ export function extractHeadings(content: string): Heading[] {
 
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length
-    const text = match[2].replace(/`[^`]+`/g, '').trim()
+    const text = match[2].replace(/`([^`]+)`/g, '$1').trim()
     const baseId = text
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
