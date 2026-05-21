@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 const DEMO_USERS = [
   { id: '1', email: 'admin@demo.com', password: 'admin123', name: 'Alexandre Admin', role: 'admin' },
-  { id: '2', email: 'user@demo.com', password: 'user123', name: 'Marie Dupont', role: 'user' },
+  { id: '2', email: 'user@demo.com', password: 'user123', name: 'Marie Dupont', role: 'member' },
 ]
 
 export const authOptions: NextAuthOptions = {

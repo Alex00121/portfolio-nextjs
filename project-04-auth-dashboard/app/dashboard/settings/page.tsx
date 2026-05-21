@@ -1,17 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Save, Loader2 } from 'lucide-react'
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
-  const [name, setName] = useState(session?.user?.name || '')
-  const [email, setEmail] = useState(session?.user?.email || '')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const initials = name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+  useEffect(() => {
+    if (session?.user?.name) setName(session.user.name)
+    if (session?.user?.email) setEmail(session.user.email)
+  }, [session])
+
+  const rawInitials = name.split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+  const initials = rawInitials || 'U'
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
