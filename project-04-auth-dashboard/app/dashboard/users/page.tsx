@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { demoUsers } from '@/lib/data'
 import { ShieldCheck, User, Eye } from 'lucide-react'
 
-const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+const ROLE_CONFIG: Record<string, { label: string; color: string; icon: ReactNode }> = {
   admin: {
     label: 'Admin',
     color: 'bg-indigo-100 text-indigo-700 border border-indigo-200',
@@ -24,7 +25,7 @@ const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.Re
 
 export default async function UsersPage() {
   const session = await getServerSession(authOptions)
-  const role = (session?.user as { role?: string })?.role
+  const role = session?.user?.role
 
   if (!session) redirect('/login')
   if (role !== 'admin') redirect('/dashboard')

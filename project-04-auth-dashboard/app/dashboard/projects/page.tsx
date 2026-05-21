@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { fakeProjects } from '@/lib/data'
 import { MoreHorizontal, Plus, CheckCircle2, Clock, PauseCircle } from 'lucide-react'
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: ReactNode }> = {
   active: {
     label: 'Actif',
     color: 'bg-emerald-100 text-emerald-700 border border-emerald-200',

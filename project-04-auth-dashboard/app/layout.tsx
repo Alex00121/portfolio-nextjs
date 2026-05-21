@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import './globals.css'
 import { SessionProvider } from '@/components/SessionProvider'
 
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Tableau de bord avec authentification NextAuth, gestion de projets et utilisateurs.',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <body className="bg-slate-50 text-slate-900 antialiased">

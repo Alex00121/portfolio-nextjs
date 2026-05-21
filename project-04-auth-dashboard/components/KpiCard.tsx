@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 interface KpiCardProps {
@@ -6,7 +7,7 @@ interface KpiCardProps {
   trend: string
   trendUp: boolean
   borderColor: string
-  icon: React.ReactNode
+  icon: ReactNode
 }
 
 export default function KpiCard({ label, value, trend, trendUp, borderColor, icon }: KpiCardProps) {

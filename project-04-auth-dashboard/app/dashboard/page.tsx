@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const name = session.user?.name?.split(' ')[0]
+  const name = session.user?.name?.split(' ')[0] ?? ''
 
   return (
     <div className="p-8 fade-in">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import { useSession } from 'next-auth/react'
 import { Save, Loader2 } from 'lucide-react'
 
@@ -19,7 +20,7 @@ export default function SettingsPage() {
   const rawInitials = name.split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2)
   const initials = rawInitials || 'U'
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
     await update({ name, email })

@@ -22,8 +22,8 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const role = (session?.user as { role?: string })?.role
-  const initials = session?.user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'
+  const role = session?.user?.role
+  const initials = session?.user?.name?.split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || role === 'admin')
 
