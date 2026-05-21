@@ -5,11 +5,12 @@ import { TagFilter } from '@/components/TagFilter'
 import { BookOpen } from 'lucide-react'
 
 interface HomeProps {
-  searchParams: { tag?: string }
+  searchParams: { tag?: string | string[] }
 }
 
 export default function HomePage({ searchParams }: HomeProps) {
-  const activeTag = searchParams.tag ?? null
+  const rawTag = searchParams.tag
+  const activeTag = Array.isArray(rawTag) ? rawTag[0] : (rawTag ?? null)
   const allPosts = getAllPosts()
   const allTags = getAllTags()
 

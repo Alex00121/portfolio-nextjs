@@ -64,17 +64,23 @@ export function getAllPosts(): Post[] {
 export function extractHeadings(content: string): Heading[] {
   const headingRegex = /^(#{2,3})\s+(.+)$/gm
   const headings: Heading[] = []
+  const seenIds = new Map<string, number>()
   let match: RegExpExecArray | null
 
   while ((match = headingRegex.exec(content)) !== null) {
     const level = match[1].length
     const text = match[2].replace(/`[^`]+`/g, '').trim()
-    const id = text
+    const baseId = text
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim()
+
+    const count = seenIds.get(baseId) ?? 0
+    seenIds.set(baseId, count + 1)
+    const id = count === 0 ? baseId : `${baseId}-${count}`
+
     headings.push({ id, text, level })
   }
 

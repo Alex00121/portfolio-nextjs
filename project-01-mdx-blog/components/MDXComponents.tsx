@@ -1,6 +1,5 @@
 import type { MDXComponents } from 'mdx/types'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Pre } from './Pre'
 
 export const mdxComponents: MDXComponents = {
@@ -64,17 +63,18 @@ export const mdxComponents: MDXComponents = {
     )
   },
 
-  img: ({ src, alt, ...props }) => (
+  img: ({ src, alt }) => (
     <figure className="my-8">
-      <div className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-dark-surface
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-dark-surface
                        bg-gradient-to-br from-slate-100 to-slate-200 dark:from-dark-surface dark:to-dark-elevated">
         {src ? (
-          <Image
+          // Using <img> for MDX content — src can be local or any external URL
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={src}
             alt={alt ?? ''}
-            width={800}
-            height={450}
-            className="w-full object-cover"
+            className="w-full h-auto object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="h-48 flex items-center justify-center text-slate-400">

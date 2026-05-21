@@ -8,15 +8,24 @@ export function TableOfContents({ headings }: { headings: Heading[] }) {
   const [activeId, setActiveId] = useState<string>('')
 
   useEffect(() => {
-    const headingElements = headings.map(({ id }) => document.getElementById(id)).filter(Boolean)
+    const headingElements = headings
+      .map(({ id }) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null)
+
+    const visibleIds = new Set<string>()
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id)
+            visibleIds.add(entry.target.id)
+          } else {
+            visibleIds.delete(entry.target.id)
           }
         })
+        // Activate the first visible heading in document order
+        const firstVisible = headingElements.find((el) => visibleIds.has(el.id))
+        if (firstVisible) setActiveId(firstVisible.id)
       },
       {
         rootMargin: '-80px 0px -60% 0px',
@@ -24,7 +33,7 @@ export function TableOfContents({ headings }: { headings: Heading[] }) {
       }
     )
 
-    headingElements.forEach((el) => el && observer.observe(el))
+    headingElements.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [headings])
 
