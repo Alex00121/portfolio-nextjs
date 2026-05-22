@@ -47,8 +47,11 @@ export default function HeroSection() {
         }, 40);
         return () => clearTimeout(t);
       } else {
-        setRoleIndex((i) => (i + 1) % roles.length);
-        setTyping(true);
+        const t = setTimeout(() => {
+          setRoleIndex((i) => (i + 1) % roles.length);
+          setTyping(true);
+        }, 0);
+        return () => clearTimeout(t);
       }
     }
   }, [charIndex, typing, roleIndex]);

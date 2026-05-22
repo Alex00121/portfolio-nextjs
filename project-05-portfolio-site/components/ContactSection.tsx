@@ -61,7 +61,7 @@ export default function ContactSection() {
 
   const validate = (): boolean => {
     const errs: FormErrors = {};
-    if (!form.name.trim() || form.name.length < 2)
+    if (!form.name.trim() || form.name.trim().length < 2)
       errs.name = "Le nom doit contenir au moins 2 caractères.";
     if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
       errs.email = "Adresse email invalide.";
@@ -95,7 +95,7 @@ export default function ContactSection() {
       {type === "textarea" ? (
         <textarea
           value={form[key]}
-          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+          onChange={(e) => { const v = e.target.value; setForm((prev) => ({ ...prev, [key]: v })); }}
           placeholder={placeholder}
           rows={5}
           className={`w-full px-4 py-3 rounded-xl bg-elevated border text-white placeholder-white/30 outline-none transition-all duration-200 resize-none ${
@@ -108,7 +108,7 @@ export default function ContactSection() {
         <input
           type={type}
           value={form[key]}
-          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+          onChange={(e) => { const v = e.target.value; setForm((prev) => ({ ...prev, [key]: v })); }}
           placeholder={placeholder}
           className={`w-full px-4 py-3 rounded-xl bg-elevated border text-white placeholder-white/30 outline-none transition-all duration-200 ${
             errors[key]
